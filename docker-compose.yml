@@ -1,0 +1,35 @@
+
+version: "3.5"
+services:
+
+  
+
+  nats-1:
+    image: nats
+    ports:
+      - "8222:8222"
+    
+  nats-2:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats-1"]
+
+  nats-3:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats-2"]
+
+  nats-service:
+    image: nats-rest-service:0.0.1-SNAPSHOT
+    environment:
+      - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+    ports: 
+      - "8080:8080"
+    networks: ["nats"]
+    depends_on: ["nats-3"]
+
+networks:
+  nats:
+    name: nats
